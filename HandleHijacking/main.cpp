@@ -97,7 +97,7 @@ HANDLE HandleHijack(DWORD Pid)
 	ULONG ReturnLength = 16;
 	std::vector<BYTE> HandleMemory(ReturnLength, 0);
 
-	NTSTATUS Status = 0;
+	NTSTATUS Status = STATUS_SUCCESS;
 	while (Status = NtQuerySystemInformation(SystemHandleInformation, &HandleMemory[0], ReturnLength, &ReturnLength), !NT_SUCCESS(Status))
 	{
 		HandleMemory.resize(ReturnLength);

@@ -4,6 +4,8 @@
 
 #define HANDLE_TYPE_PROCESS 7
 
+#define STATUS_SUCCESS 0
+
 #define NT_SUCCESS(Status) ((NTSTATUS)(Status) >= 0)
 
 typedef struct _UNICODE_STRING {
