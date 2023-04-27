@@ -211,6 +211,7 @@ int main(int argc, const char* argv[])
 
 	printf("[*] Hijacked Handle from [PID: %lu] - 0x%X\n", Pid, HandleToULong(hHijacked));
 
+	/*
 	// Example usage of the hijacked handle.
 	IMAGE_DOS_HEADER DosHeader = {};
 	LPVOID BaseAddress = GetModuleBase(Pid);
@@ -222,6 +223,7 @@ int main(int argc, const char* argv[])
 
 	printf("[*] -> IMAGE_DOS_HEADER.Magic = %s\n", MZString.c_str());
 	// Example usage of the hijacked handle.
+	*/
 
 	if (!CloseHandle(hHijacked))
 		printf("[-] CloseHandle for hHijacked failed, err: 0x%X\n", GetLastError());
