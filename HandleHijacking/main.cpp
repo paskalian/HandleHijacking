@@ -3,6 +3,7 @@
 #include <string>
 #include <Psapi.h>
 #include <vector>
+#include <TlHelp32.h>
 
 #include "nt.h"
 
@@ -51,6 +52,27 @@ DWORD GetSvcPidByName(const char* SvcName)
 		printf("[-] CloseServiceHandle for SvcManagerHandle failed, err: 0x%X\n", GetLastError());
 	
 	return SvcPid;
+}
+
+LPVOID GetModuleBase(DWORD Pid)
+{
+	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, Pid);
+	if (!hSnapshot)
+	{
+		printf("CreateToolhelp32Snapshot failed, err: 0x%X\n", GetLastError());
+		return 0;
+	}
+
+	MODULEENTRY32 ModEntry = {};
+	ModEntry.dwSize = sizeof(MODULEENTRY32);
+
+	if (!Module32First(hSnapshot, &ModEntry))
+		printf("Module32First failed, err: 0x%X\n", GetLastError());
+
+	if (!CloseHandle(hSnapshot))
+		printf("[-] CloseHandle failed, err: 0x%X\n", GetLastError());
+
+	return (LPVOID)ModEntry.modBaseAddr;
 }
 
 HANDLE HandleHijack(DWORD Pid)
@@ -188,6 +210,18 @@ int main(int argc, const char* argv[])
 	}
 
 	printf("[*] Hijacked Handle from [PID: %lu] - 0x%X\n", Pid, HandleToULong(hHijacked));
+
+	// Example usage of the hijacked handle.
+	IMAGE_DOS_HEADER DosHeader = {};
+	LPVOID BaseAddress = GetModuleBase(Pid);
+	if (!ReadProcessMemory(hHijacked, BaseAddress, &DosHeader, sizeof(IMAGE_DOS_HEADER), NULL))
+		printf("[-] ReadProcessMemory failed, err: 0x%X\n", GetLastError());
+
+	std::string MZString = (char*)&DosHeader.e_magic;
+	MZString.resize(2);
+
+	printf("[*] -> IMAGE_DOS_HEADER.Magic = %s\n", MZString.c_str());
+	// Example usage of the hijacked handle.
 
 	if (!CloseHandle(hHijacked))
 		printf("[-] CloseHandle for hHijacked failed, err: 0x%X\n", GetLastError());
