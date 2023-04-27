@@ -98,12 +98,22 @@ HANDLE HandleHijack(DWORD Pid)
 	std::vector<BYTE> HandleMemory(ReturnLength, 0);
 
 	NTSTATUS Status = 0;
+
+	
 	while (Status = NtQuerySystemInformation(SystemHandleInformation, &HandleMemory[0], ReturnLength, &ReturnLength), !NT_SUCCESS(Status))
 	{
 		HandleMemory.resize(ReturnLength);
 
 		if (Status = NtQuerySystemInformation(SystemHandleInformation, &HandleMemory[0], ReturnLength, &ReturnLength), NT_SUCCESS(Status))
 			break;
+
+		// If it still couldn't get the handle in the 100th time then we just quit to prevent deadlock.
+		static SIZE_T IterateTimes = 0;
+		if (++IterateTimes >= 100)
+		{
+			printf("[-] NTDLL!NtQuerySystemInformation couldn't retrieve handle information.\n");
+			return 0;
+		}
 	}
 
 	// Storing the pointer at a different variable so we don't have to keep doing ' (PSYSTEM_HANDLE_INFORMATION)&HandleMemory[0] '.
